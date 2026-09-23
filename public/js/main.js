@@ -264,3 +264,30 @@ window.addEventListener("message", (event) => {
     }
 });
 
+
+
+// Hey Welcome 中就開始載入各章節標題與內容並放入快取
+async function preloadChaptersAndContent() {
+    try {
+        const response = await fetch('/api/chapters');
+        if (response.ok) {
+            const chapters = await response.json();
+            localStorage.setItem('cached_chapters', JSON.stringify(chapters));
+            sessionStorage.setItem('cached_chapters', JSON.stringify(chapters));
+
+            // 背景預先抓取各章節 content 並存入快取
+            chapters.forEach(ch => {
+                const chNum = ch.chapter_number;
+                fetch(`/get-content/${chNum}`)
+                    .then(res => res.text())
+                    .then(html => {
+                        sessionStorage.setItem(`cached_content_${chNum}`, html);
+                    })
+                    .catch(() => {});
+            });
+        }
+    } catch (e) {
+        console.log('預先抓取章節資訊失敗:', e);
+    }
+}
+preloadChaptersAndContent();

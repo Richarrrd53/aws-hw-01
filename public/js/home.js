@@ -111,6 +111,27 @@ document.addEventListener("DOMContentLoaded", () => {
             ch.classList.remove("focusCh", "unfocusCh");
             ch.classList.add("unfocusCh");
         }
+
+        // 章節 hover 預先抓取 content 快取，實現無痕極速載入
+        const chNum = i + 1;
+        const chGroup = document.getElementById("ch_g_" + chNum);
+        const readmoreBox = document.getElementById("readmore" + chNum);
+        const nextBtn = document.getElementById("ch_next" + chNum);
+        const triggerPrefetch = () => prefetchChapterContent(chNum);
+
+        if (chGroup) {
+            chGroup.addEventListener("mouseenter", triggerPrefetch, { passive: true });
+            chGroup.addEventListener("touchstart", triggerPrefetch, { passive: true });
+        }
+        if (ch) {
+            ch.addEventListener("mouseenter", triggerPrefetch, { passive: true });
+        }
+        if (readmoreBox) {
+            readmoreBox.addEventListener("mouseenter", triggerPrefetch, { passive: true });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener("mouseenter", () => prefetchChapterContent(chNum + 1), { passive: true });
+        }
     }
 });
 
@@ -195,6 +216,47 @@ chContainer.addEventListener("wheel", (e) => {
         menuScorller.scrollTop += e.deltaY*(1080/400);
     }
 }, { passive: false });
+
+
+const contentCache = new Map();
+const prefetchingSet = new Set();
+
+async function prefetchChapterContent(i) {
+    if (contentCache.has(i) || prefetchingSet.has(i)) return;
+    const cached = sessionStorage.getItem(`cached_content_${i}`);
+    if (cached) {
+        contentCache.set(i, cached);
+        return;
+    }
+    prefetchingSet.add(i);
+    try {
+        const res = await fetch(`/get-content/${i}`);
+        if (res.ok) {
+            const html = await res.text();
+            contentCache.set(i, html);
+            sessionStorage.setItem(`cached_content_${i}`, html);
+        }
+    } catch (err) {
+        console.log(`預取章節 ${i} 內容失敗:`, err);
+    } finally {
+        prefetchingSet.delete(i);
+    }
+}
+
+function applyCachedChapterTitles() {
+    const cached = sessionStorage.getItem('cached_chapters') || localStorage.getItem('cached_chapters');
+    if (cached) {
+        try {
+            const chapters = JSON.parse(cached);
+            for (let i = 1; i <= TOTAL_CHAPTERS; i++) {
+                const chData = chapters.find(c => c.chapter_number === i);
+                if (chData) {
+                    setChapterSubtitle(i, chData.title || `Chapter ${i}`);
+                }
+            }
+        } catch (e) {}
+    }
+}
 
 function setChapterSubtitle(i, titleText) {
     const subEl = document.getElementById("ch" + i + "_subtitle");
@@ -281,6 +343,7 @@ async function syncChapterTitles() {
         console.log('同步章節標題失敗:', err);
     }
 }
+applyCachedChapterTitles();
 syncChapterTitles();
 
 if (document.fonts) {
@@ -291,9 +354,19 @@ if (document.fonts) {
 window.addEventListener("resize", refreshAllSubtitleOverflow);
 
 async function loadContent(content, i) {
+    // 優先讀取記憶體快取或 sessionStorage，實現 0ms 無痕瞬間載入
+    const cached = contentCache.get(i) || sessionStorage.getItem('cached_content_' + i);
+    if (cached) {
+        content.innerHTML = cached;
+        contentCache.set(i, cached);
+        return;
+    }
+
     try {
-        const response = await fetch(`/get-content/${i}`);
+        const response = await fetch('/get-content/' + i);
         const text = await response.text();
+        contentCache.set(i, text);
+        sessionStorage.setItem('cached_content_' + i, text);
         content.innerHTML = text;
     } catch (error) {
         console.error('讀取文件失敗:', error);

@@ -334,7 +334,8 @@ button.continueBtn .button-text {
 }
 
 .ch_title{
-    width: 200px;
+    width: 240px;
+    white-space: nowrap;
     position: absolute;
     margin-left: 0px;
     margin-top: 190px;
@@ -352,12 +353,72 @@ button.continueBtn .button-text {
     color: #3f3f3f;
     text-align: left;
     font-size: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
     transition: all 0.5s cubic-bezier(.4,0,.2,1);
+}
+
+.ch_subtitle .ch_subtitle_text{
+    display: inline-block;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+/* 漸變遮罩與自動滾動 */
+.ch_subtitle.is-overflowing{
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+    animation: subtitleMaskAnim var(--scroll-dur, 6s) ease infinite;
+}
+
+.ch_subtitle.is-overflowing .ch_subtitle_text{
+    animation: subtitleScrollAnim var(--scroll-dur, 6s) cubic-bezier(0.42, 0, 0.58, 1) infinite;
+}
+
+.ch_subtitle:hover,
+.ch_subtitle:hover .ch_subtitle_text{
+    animation-play-state: paused;
+}
+
+@keyframes subtitleScrollAnim {
+    0%, 15% {
+        transform: translateX(0);
+    }
+    45%, 65% {
+        transform: translateX(calc(-1 * var(--scroll-dist, 0px)));
+    }
+    95%, 100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes subtitleMaskAnim {
+    0%, 15% {
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+    }
+    22%, 40% {
+        -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 calc(100% - 20px), transparent 100%);
+        mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 calc(100% - 20px), transparent 100%);
+    }
+    45%, 65% {
+        -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 100%);
+        mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 100%);
+    }
+    72%, 90% {
+        -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 calc(100% - 20px), transparent 100%);
+        mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 calc(100% - 20px), transparent 100%);
+    }
+    95%, 100% {
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+    }
 }
 
 .ch_icon{
     margin-left: 40px;
-    margin-bottom: 160px;
+    margin-bottom: 90px;
     position: absolute;
     width: 200px;
     height: auto;
@@ -393,7 +454,7 @@ button.continueBtn .button-text {
 }
 
 .chapters:hover .ch_icon{
-    margin-bottom: 200px;
+    margin-bottom: 160px;
     scale: 1.2;
 }
 
@@ -476,6 +537,7 @@ button.continueBtn .button-text {
     opacity: 0;
     filter: blur(30px);
     transition: all 1s cubic-bezier(.4,0,.2,1);
+    white-space: nowrap;
 }
 
 #ch18_slide_1{
@@ -495,6 +557,7 @@ button.continueBtn .button-text {
     opacity: 0;
     filter: blur(30px);
     transition: all 1s cubic-bezier(.4,0,.2,1);
+    white-space: nowrap;
 }
 
 #ch18_slide_2{

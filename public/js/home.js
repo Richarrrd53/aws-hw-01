@@ -89,7 +89,7 @@ document.getElementById = function(id) {
 const menuScorller = document.getElementById("menuScroller");
 const readmoreBtns = document.getElementsByClassName("readmore");
 
-let imgNum = [3, 3, 3, 3, 5];
+let imgNum = [1, 1, 1, 1, 1];
 
 document.addEventListener("DOMContentLoaded", () => {
     for(let i = 0; i < TOTAL_CHAPTERS; i++){
@@ -196,6 +196,46 @@ chContainer.addEventListener("wheel", (e) => {
     }
 }, { passive: false });
 
+function setChapterSubtitle(i, titleText) {
+    const subEl = document.getElementById("ch" + i + "_subtitle");
+    if (!subEl) return;
+    subEl.innerHTML = `<span class="ch_subtitle_text">${titleText}</span>`;
+    requestAnimationFrame(() => {
+        checkSubtitleOverflow(subEl);
+    });
+}
+
+function checkSubtitleOverflow(subEl) {
+    if (!subEl) return;
+    const textSpan = subEl.querySelector(".ch_subtitle_text");
+    if (!textSpan) return;
+
+    // Reset overflow properties to measure true text size
+    subEl.classList.remove("is-overflowing");
+    subEl.style.removeProperty("--scroll-dist");
+    subEl.style.removeProperty("--scroll-dur");
+
+    const containerWidth = subEl.clientWidth || 200;
+    const textWidth = textSpan.scrollWidth;
+
+    if (textWidth > containerWidth + 4) {
+        const diff = textWidth - containerWidth;
+        const dur = Math.max(4.5, Math.min(12, diff / 22)); // smooth reading speed
+        subEl.style.setProperty("--scroll-dist", (diff + 10) + "px");
+        subEl.style.setProperty("--scroll-dur", dur + "s");
+        subEl.classList.add("is-overflowing");
+    } else {
+        subEl.classList.remove("is-overflowing");
+    }
+}
+
+function refreshAllSubtitleOverflow() {
+    for (let i = 1; i <= TOTAL_CHAPTERS; i++) {
+        const subEl = document.getElementById("ch" + i + "_subtitle");
+        if (subEl) checkSubtitleOverflow(subEl);
+    }
+}
+
 async function syncChapterTitles() {
     try {
         const response = await fetch('/api/chapters');
@@ -208,7 +248,7 @@ async function syncChapterTitles() {
                 const chData = chapters.find(c => c.chapter_number === i);
 
                 if (chData) {
-                    if (subEl) subEl.innerText = chData.title || `Series ${i}`;
+                    setChapterSubtitle(i, chData.title || `Chapter ${i}`);
                     if (chCard) {
                         chCard.style.opacity = "";
                         chCard.style.filter = "";
@@ -219,7 +259,7 @@ async function syncChapterTitles() {
                     }
                 } else {
                     // Chapter is deleted in database
-                    if (subEl) subEl.innerText = "已刪除";
+                    setChapterSubtitle(i, "已刪除");
                     if (chCard) {
                         chCard.style.opacity = "0.45";
                         chCard.style.filter = "grayscale(80%)";
@@ -236,6 +276,13 @@ async function syncChapterTitles() {
     }
 }
 syncChapterTitles();
+
+if (document.fonts) {
+    document.fonts.ready.then(() => {
+        refreshAllSubtitleOverflow();
+    });
+}
+window.addEventListener("resize", refreshAllSubtitleOverflow);
 
 async function loadContent(content, i) {
     try {
@@ -271,6 +318,7 @@ function readmore(i) {
     bg = document.getElementById("ch"+i+"_bg");
     title = document.getElementById("ch"+i+"_title");
     subtitle = document.getElementById("ch"+i+"_subtitle");
+    subtitle.classList.remove("is-overflowing");
     icon = document.getElementById("ch"+i+"_icon");
     closeBtn = document.getElementById("close"+i);
     slide1 = document.getElementById("ch"+i+"_slide_1");
@@ -404,8 +452,8 @@ function readmore(i) {
                 }
                 content.style.opacity = 1;
                 content.style.filter = "blur(0)";
-                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.jpg`;
-                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.jpg`;
+                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.png`;
+                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.png`;
             }, 1600);
             setTimeout(() => {
                 fullscreenBtn.style.opacity = 1;
@@ -419,9 +467,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
-                imgLoopTimer = setInterval(() => {
-                    fullscreenImgLoop(i);
-                }, 8000);
+                // imgLoopTimer disabled (single photo per chapter)
             }, 2000);
             break;
         case -2:
@@ -526,8 +572,8 @@ function readmore(i) {
                 content.style.opacity = 1;
                 content.style.filter = "blur(0)";
                 
-                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.jpg`;
-                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.jpg`;
+                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.png`;
+                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.png`;
             }, 1600);
             setTimeout(() => {
                 fullscreenBtn.style.opacity = 1;
@@ -540,9 +586,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
-                imgLoopTimer = setInterval(() => {
-                    fullscreenImgLoop(i);
-                }, 8000);
+                // imgLoopTimer disabled (single photo per chapter)
             }, 2000);
             
             break;
@@ -648,8 +692,8 @@ function readmore(i) {
                 }
                 content.style.opacity = 1;
                 content.style.filter = "blur(0)";
-                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.jpg`;
-                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.jpg`;
+                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.png`;
+                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.png`;
             }, 1600);
             setTimeout(() => {
                 fullscreenBtn.style.opacity = 1;
@@ -662,9 +706,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
-                imgLoopTimer = setInterval(() => {
-                    fullscreenImgLoop(i);
-                }, 8000);
+                // imgLoopTimer disabled (single photo per chapter)
             }, 2000);
             break;
         case -4:
@@ -775,8 +817,8 @@ function readmore(i) {
                 }
                 content.style.opacity = 1;
                 content.style.filter = "blur(0)";
-                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.jpg`;
-                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.jpg`;
+                fullscreenImagesG[0].children[0].src = `../img/work/${i}-1.png`;
+                fullscreenImagesG[1].children[0].src = `../img/work/${i}-1.png`;
             }, 1600);
             setTimeout(() => {
                 fullscreenBtn.style.opacity = 1;
@@ -789,9 +831,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
-                imgLoopTimer = setInterval(() => {
-                    fullscreenImgLoop(i);
-                }, 8000);
+                // imgLoopTimer disabled (single photo per chapter)
             }, 2000);
             break;
     }
@@ -959,6 +999,7 @@ function closeCh(i){
             setTimeout(() => {
                 backBtn.style.transitionDuration = "0.2s";
                 isOpen = false;
+            checkSubtitleOverflow(subtitle);
             }, 3100);
             break;
         case -2:
@@ -1572,8 +1613,8 @@ function nextBtnCh(i){
         fullscreenBtn.style.opacity = 1;
         fullscreenBtn.style.filter = "blur(0)";
         fullscreenImagesContainer.style.display = "flex";
-        fullscreenImagesG[0].children[0].src = `../img/work/${i+1}-1.jpg`;
-        fullscreenImagesG[1].children[0].src = `../img/work/${i+1}-1.jpg`;
+        fullscreenImagesG[0].children[0].src = `../img/work/${i+1}-1.png`;
+        fullscreenImagesG[1].children[0].src = `../img/work/${i+1}-1.png`;
         fullscreenImagesG[0].style.zIndex = imgNum[i]+7;
         fullscreenImagesG[1].style.zIndex = imgNum[i]+8;
         imgH = icon2.children[0].offsetHeight;
@@ -1581,9 +1622,7 @@ function nextBtnCh(i){
         fullscreenImagesG[1].style.height = imgH + "px";
         icon2.style.opacity = 0;
         tempN = 0;
-        imgLoopTimer = setInterval(() => {
-            fullscreenImgLoop(i+1);
-        }, 8000);
+        // imgLoopTimer disabled (single photo per chapter)
         chContainer.style.transitionDuration = "0.1s";
         bg.style.transitionDuration = "0.5s";
         title.style.transitionDuration = "0.5s";
@@ -1606,93 +1645,12 @@ const imgLoadingBG = document.getElementById("imgLoadingBG");
 
 
 async function fullscreenImgLoop(i){
-    const imgG = document.getElementsByClassName("fullscreenImagesG");
-    imgLoadingBG.style.width = "600px";
-    imgLoadingBG.style.height = imgH + "px";
-    imgLoadingBG.style.borderRadius = "60px";
-    imgLoadingBG.style.transform = "translate(0%, -50%)";
-    let Max = imgNum[i-1] - 1;
-
-    const currentN = tempN;
-    const nextN = (tempN + 1) % (Max + 1);
-    const nextImgUrl = `../img/work/${tempI}-${nextN + 1}.jpg`;
-
-    try{
-        imgLoadingBG.style.display = "flex";
-
-        await preloadImage(nextImgUrl);
-
-        imgLoadingBG.style.display = "none";
-
-        imgG[0].children[0].src = `../img/work/${tempI}-${currentN + 1}.jpg`; 
-        imgG[1].children[0].src = nextImgUrl; 
-        imgG[0].children[0].style.animation = "imagesLoop1 1s cubic-bezier(.4,0,.2,1)";
-        imgG[1].children[0].style.animation = "imagesLoop2 1s cubic-bezier(.4,0,.2,1)";
-
-        tempN = nextN; 
-
-        await new Promise(resolve => {
-            const targetElement = imgG[1].children[0]; 
-
-            const handleAnimationEnd = () => {
-                targetElement.removeEventListener('animationend', handleAnimationEnd); 
-                resolve();
-            };
-
-            targetElement.addEventListener('animationend', handleAnimationEnd);
-        });
-
-        imgG[0].children[0].style.animation = "none";
-        imgG[1].children[0].style.animation = "none";
-        imgG[0].children[0].src = `../img/work/${tempI}-${(tempN)%(Max + 1) + 1}.jpg`;
-        imgG[1].children[0].src = `../img/work/${tempI}-${(tempN+1)%(Max + 1) + 1}.jpg`;
-        isSwitching = false;
-    }
-    catch (error){
-        console.error("自動輪播圖片載入失敗:", error.message);
-    }
+    // Single image per chapter - no loop needed
+    return;
 }
 
 async function endingImgLoop(i){
-    const imgG = document.getElementsByClassName("fullscreenImagesG");
-    let Max = imgNum[i-1] - 1;
-
-
-    const firstImgUrl = `../img/work/${i}-1.jpg`;
-    const secondImgUrl = `../img/work/${i}-2.jpg`;
-
-
-    if(tempN != 0){
-        try{
-            await preloadImage(firstImgUrl);
-
-            imgG[0].children[0].src = `../img/work/${tempI}-${(tempN)%(Max + 1) + 1}.jpg`; 
-            imgG[1].children[0].src = firstImgUrl; 
-
-            imgG[0].children[0].style.animation = "imagesLoop1 1s cubic-bezier(.4,0,.2,1)";
-            imgG[1].children[0].style.animation = "imagesLoop2 1s cubic-bezier(.4,0,.2,1)";
-
-            await new Promise(resolve => {
-                const targetElement = imgG[1].children[0]; 
-
-                const handleAnimationEnd = () => {
-                    targetElement.removeEventListener('animationend', handleAnimationEnd); 
-                    resolve();
-                };
-
-                targetElement.addEventListener('animationend', handleAnimationEnd);
-            });
-
-            imgG[0].children[0].style.animation = "none";
-            imgG[1].children[0].style.animation = "none";
-            imgG[0].children[0].src = `../img/work/${tempI}-${(tempN)%(Max + 1) + 1}.jpg`;
-            imgG[1].children[0].src = `../img/work/${tempI}-${(tempN+1)%(Max + 1) + 1}.jpg`;
-            isSwitching = false;
-        }
-        catch (error){
-            console.error("輪播結束圖片載入失敗:", error.message);
-        }
-    }
+    return;
 }
 
 const fullscrBG = document.getElementById("fullscrBG");
@@ -1806,9 +1764,7 @@ function exitFullscr(){
         chContainer.style.filter = "blur(0px)";
         bgText2.style.filter = "blur(0px)";
         
-        imgLoopTimer = setInterval(() => {
-            fullscreenImgLoop(tempI);
-        }, 8000);
+        // imgLoopTimer disabled (single photo per chapter)
     }, 100);
     setTimeout(() => {
         closeBtn.style.display = "none";
@@ -1840,10 +1796,10 @@ async function fullscrNextImg(){
     let Max = imgNum[tempI-1] - 1;
 
     const nextN = (tempN + 1) % (Max + 1);
-    const nextImgUrl = `../img/work/${tempI}-${nextN + 1}.jpg`;
+    const nextImgUrl = `../img/work/${tempI}-${nextN + 1}.png`;
 
     const nextNextN = (tempN + 2) % (Max + 1);
-    const nextNextImgUrl = `../img/work/${tempI}-${nextNextN + 1}.jpg`;
+    const nextNextImgUrl = `../img/work/${tempI}-${nextNextN + 1}.png`;
 
     if(!isSwitching){
         isSwitching = true;
@@ -1854,7 +1810,7 @@ async function fullscrNextImg(){
 
             imgLoadingBG.style.display = "none";
 
-            imgG[0].children[0].src = `../img/work/${tempI}-${(tempN)%(Max + 1) + 1}.jpg`;
+            imgG[0].children[0].src = `../img/work/${tempI}-${(tempN)%(Max + 1) + 1}.png`;
             imgG[1].children[0].src = nextImgUrl;
 
             imgG[0].children[0].style.animation = "imagesLoop1 1s cubic-bezier(.4,0,.2,1)";
@@ -1889,8 +1845,8 @@ async function fullscrNextImg(){
 
             imgG[0].children[0].style.animation = "none";
             imgG[1].children[0].style.animation = "none";
-            imgG[0].children[0].src = `../img/work/${tempI}-${(tempN)%(Max + 1) + 1}.jpg`;
-            imgG[1].children[0].src = `../img/work/${tempI}-${(tempN+1)%(Max + 1) + 1}.jpg`;
+            imgG[0].children[0].src = `../img/work/${tempI}-${(tempN)%(Max + 1) + 1}.png`;
+            imgG[1].children[0].src = `../img/work/${tempI}-${(tempN+1)%(Max + 1) + 1}.png`;
             isSwitching = false;
         }
         catch (error){
@@ -1910,10 +1866,10 @@ async function fullscrPrevImg(){
     let Max = imgNum[tempI-1] - 1;
 
     const prevN = (tempN - 1 + (Max + 1)) % (Max + 1);
-    const prevImgUrl = `../img/work/${tempI}-${prevN + 1}.jpg`;
+    const prevImgUrl = `../img/work/${tempI}-${prevN + 1}.png`;
 
     const currentN = tempN;
-    const currentImgUrl = `../img/work/${tempI}-${currentN + 1}.jpg`;
+    const currentImgUrl = `../img/work/${tempI}-${currentN + 1}.png`;
 
     if(!isSwitching){
         isSwitching = true;
@@ -2125,8 +2081,8 @@ async function fullscrSwitchTo(targetIndex){
         try {
             imgLoadingBG.style.display = "flex";
 
-            const targetImgUrl = `../img/work/${tempI}-${targetN + 1}.jpg`;
-            const currentImgUrl = `../img/work/${tempI}-${tempN + 1}.jpg`;
+            const targetImgUrl = `../img/work/${tempI}-${targetN + 1}.png`;
+            const currentImgUrl = `../img/work/${tempI}-${tempN + 1}.png`;
 
             await preloadImage(targetImgUrl);
 
@@ -2179,8 +2135,8 @@ async function fullscrSwitchTo(targetIndex){
 
             imgG[0].children[0].style.animation = "none";
             imgG[1].children[0].style.animation = "none";
-            imgG[0].children[0].src = `../img/work/${tempI}-${tempN + 1}.jpg`;
-            imgG[1].children[0].src = `../img/work/${tempI}-${(tempN + 1) % (Max + 1) + 1}.jpg`;
+            imgG[0].children[0].src = `../img/work/${tempI}-${tempN + 1}.png`;
+            imgG[1].children[0].src = `../img/work/${tempI}-${(tempN + 1) % (Max + 1) + 1}.png`;
 
             isSwitching = false;
         } catch (error) {

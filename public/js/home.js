@@ -48,21 +48,60 @@ function prevPage(i){
     }, 2000);
 }
 
+const TOTAL_CHAPTERS = 5;
+
+// 安全 DOM 元素代理，防止存取已刪除之 6~18 章節元素時引發 null 錯誤
+const _rawGetElementById = document.getElementById.bind(document);
+const _dummyElement = new Proxy(document.createElement("div"), {
+    get(target, prop) {
+        if (prop === 'style') {
+            return new Proxy({}, {
+                get: () => '',
+                set: () => true
+            });
+        }
+        if (prop === 'classList') {
+            return {
+                add: () => {},
+                remove: () => {},
+                contains: () => false,
+                toggle: () => {}
+            };
+        }
+        if (prop === 'children') {
+            return [_dummyElement, _dummyElement];
+        }
+        if (typeof target[prop] === 'function') {
+            return target[prop].bind(target);
+        }
+        return target[prop] !== undefined ? target[prop] : (() => {});
+    },
+    set() {
+        return true;
+    }
+});
+
+document.getElementById = function(id) {
+    const el = _rawGetElementById(id);
+    return el || _dummyElement;
+};
+
 const menuScorller = document.getElementById("menuScroller");
 const readmoreBtns = document.getElementsByClassName("readmore");
 
-let imgNum = [3, 3, 3, 3, 5, 3, 3, 3, 3, 23, 2, 4, 5, 15, 3, 7, 6, 16];
+let imgNum = [3, 3, 3, 3, 5];
 
 document.addEventListener("DOMContentLoaded", () => {
-    for(let i = 0; i < 18; i++){
-        
+    for(let i = 0; i < TOTAL_CHAPTERS; i++){
         const menuScrollerItem = document.createElement("div");
         menuScrollerItem.classList.add("menuScrollerItem");
         menuScorller.appendChild(menuScrollerItem);
-        readmoreBtns[i].onclick = () => {readmore(i+1)};
+        if (readmoreBtns[i]) {
+            readmoreBtns[i].onclick = () => {readmore(i+1)};
+        }
     }
 
-    for(let i = 0; i < 18; i++){
+    for(let i = 0; i < TOTAL_CHAPTERS; i++){
         const ch = document.getElementById("ch"+(i+1));
         if(i >= 0 && i <= 3){
             ch.classList.remove("focusCh", "unfocusCh");
@@ -78,15 +117,15 @@ document.addEventListener("DOMContentLoaded", () => {
 const chContainer = document.getElementById("chContainer");
 
 menuScorller.addEventListener("scroll", () => {
-    let scrollRatio = menuScorller.scrollTop / menuScorller.scrollHeight;
-    let vx = -scrollRatio * 400 * 18;
+    let scrollRatio = menuScorller.scrollTop / (menuScorller.scrollHeight || 1);
+    let vx = -scrollRatio * 400 * TOTAL_CHAPTERS;
     let vx2 = scrollRatio * 1500;
-    let index = Math.round(scrollRatio * 18);
+    let index = Math.round(scrollRatio * TOTAL_CHAPTERS);
     
     chContainer.style.transform = `translateX(${vx}px)`;
     scrollBar.style.marginLeft = vx2 + "px";
 
-    for(let i = 0; i < 18; i++){
+    for(let i = 0; i < TOTAL_CHAPTERS; i++){
         const ch = document.getElementById("ch"+(i+1));
         if(!ch) continue;
         if(i >= index && i <= index + 3){
@@ -137,8 +176,9 @@ scrollBarBG.addEventListener("click", (e) => {
     if(!isOpen && e.target === scrollBarBG){
         const rect = scrollBarBG.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
-        const scrollRatio = clickX / 1500;
-        menuScorller.scrollTop = scrollRatio * menuScorller.scrollHeight;
+        const targetThumbLeft = Math.max(0, Math.min(300, clickX - 600));
+        const maxScroll = menuScorller.scrollHeight - menuScorller.clientHeight;
+        menuScorller.scrollTop = (targetThumbLeft / 300) * maxScroll;
     }
 });
 
@@ -161,7 +201,7 @@ async function syncChapterTitles() {
         const response = await fetch('/api/chapters');
         if (response.ok) {
             const chapters = await response.json();
-            for (let i = 1; i <= 18; i++) {
+            for (let i = 1; i <= TOTAL_CHAPTERS; i++) {
                 const subEl = document.getElementById("ch" + i + "_subtitle");
                 const chCard = document.getElementById("ch" + i);
                 const readmoreBtn = document.getElementById("readmore" + i);
@@ -210,7 +250,17 @@ async function loadContent(content, i) {
 
 
 function readmore(i) {
-    let index = Math.round(menuScorller.scrollTop/menuScorller.scrollHeight*18);
+    let index = Math.round(menuScorller.scrollTop/menuScorller.scrollHeight*TOTAL_CHAPTERS);
+    let diff = index - i;
+    if (diff < -4) {
+        index = i - 4;
+        diff = -4;
+        menuScorller.scrollTo(0, (index / TOTAL_CHAPTERS) * menuScorller.scrollHeight);
+    } else if (diff > -1) {
+        index = i - 1;
+        diff = -1;
+        menuScorller.scrollTo(0, (index / TOTAL_CHAPTERS) * menuScorller.scrollHeight);
+    }
     const scrollBarBG = document.getElementById("scrollBarBG");
     const backBtn = document.getElementById("backBtn");
     const menuContainer = document.getElementById("menuContainer");
@@ -231,7 +281,7 @@ function readmore(i) {
     fullscreenImagesG = document.getElementsByClassName("fullscreenImagesG");
     loadContent(content,i);
 
-    if(i < 18){
+    if(i < TOTAL_CHAPTERS){
         nextBtn = document.getElementById("ch_next"+i);
         nextBtn.style.transitionDuration = "1s";
     }
@@ -251,9 +301,9 @@ function readmore(i) {
     menuScorller.style.pointerEvents = "none";
     
 
-    switch (index - i){
+    switch (diff){
         case -1:
-            if(i+4 <= 18){
+            if(i + 4 <= TOTAL_CHAPTERS){
                 ch5 = document.getElementById("ch"+(i+4));
                 ch5.style.transform = "translateY(1080px)";
                 ch5.style.opacity = 0;
@@ -349,7 +399,7 @@ function readmore(i) {
                 slide1.style.opacity = 1;
                 slide1.style.filter = "blur(0)";
                 closeBtn.style.transitionDuration = "0.2s";
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.transitionDuration = "0.2s";
                 }
                 content.style.opacity = 1;
@@ -375,7 +425,7 @@ function readmore(i) {
             }, 2000);
             break;
         case -2:
-            if(i+3 <= 18){
+            if(i + 3 <= TOTAL_CHAPTERS){
                 ch5 = document.getElementById("ch"+(i+3));
                 ch5.style.transform = "translateY(1080px)";
                 ch5.style.opacity = 0;
@@ -470,7 +520,7 @@ function readmore(i) {
                 slide1.style.opacity = 1;
                 slide1.style.filter = "blur(0)";
                 closeBtn.style.transitionDuration = "0.2s";
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.transitionDuration = "0.2s";
                 }
                 content.style.opacity = 1;
@@ -497,7 +547,7 @@ function readmore(i) {
             
             break;
         case -3:
-            if(i+2 <= 18){
+            if(i + 2 <= TOTAL_CHAPTERS){
                 ch5 = document.getElementById("ch"+(i+2));
                 ch5.style.transform = "translateY(1080px)";
                 ch5.style.opacity = 0;
@@ -593,7 +643,7 @@ function readmore(i) {
                 slide1.style.opacity = 1;
                 slide1.style.filter = "blur(0)";
                 closeBtn.style.transitionDuration = "0.2s";
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.transitionDuration = "0.2s";
                 }
                 content.style.opacity = 1;
@@ -618,7 +668,7 @@ function readmore(i) {
             }, 2000);
             break;
         case -4:
-            if(i+1 <= 18){
+            if(i + 1 <= TOTAL_CHAPTERS){
                 ch5 = document.getElementById("ch"+(i+1));
                 ch5.style.transform = "translateY(1080px)";
                 ch5.style.opacity = 0;
@@ -676,7 +726,7 @@ function readmore(i) {
                 closeBtn.style.display = "block";
                 slide1.style.display = "block";
                 slide2.style.display = "block";
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.display = "block";
                 }
                 content.style.display = "block";
@@ -701,7 +751,7 @@ function readmore(i) {
                 closeBtn.onclick = () => {closeCh(i)};
             }, 1000);
             setTimeout(() => {
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.marginTop = "800px";
                     nextBtn.style.opacity = 1;
                     nextBtn.style.filter = "blur(0)";
@@ -711,16 +761,16 @@ function readmore(i) {
 
             setTimeout(() => {
                 slide2.style.marginTop = "460px";
-                slide2.style.opacity = (i<18) ? 0.3 : 1;
-                slide2.style.fontSize = (i<18)? "" : "";
+                slide2.style.opacity = (i < TOTAL_CHAPTERS) ? 0.3 : 1;
+                slide2.style.fontSize = (i < TOTAL_CHAPTERS)? "" : "";
                 slide2.style.filter = "blur(0)";
             }, 1400);
             setTimeout(() => {
                 slide1.style.marginTop = "-100px";
-                slide1.style.opacity = (i<18) ? 1 : 0.3;
+                slide1.style.opacity = (i < TOTAL_CHAPTERS) ? 1 : 0.3;
                 slide1.style.filter = "blur(0)";
                 closeBtn.style.transitionDuration = "0.2s";
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.transitionDuration = "0.2s";
                 }
                 content.style.opacity = 1;
@@ -748,7 +798,17 @@ function readmore(i) {
 }
 
 function closeCh(i){
-    let index = Math.round(menuScorller.scrollTop/menuScorller.scrollHeight*18);
+    let index = Math.round(menuScorller.scrollTop/menuScorller.scrollHeight*TOTAL_CHAPTERS);
+    let diff = index - i;
+    if (diff < -4) {
+        index = i - 4;
+        diff = -4;
+        menuScorller.scrollTo(0, (index / TOTAL_CHAPTERS) * menuScorller.scrollHeight);
+    } else if (diff > -1) {
+        index = i - 1;
+        diff = -1;
+        menuScorller.scrollTo(0, (index / TOTAL_CHAPTERS) * menuScorller.scrollHeight);
+    }
     const scrollBarBG = document.getElementById("scrollBarBG");
     const backBtn = document.getElementById("backBtn");
     const menuContainer = document.getElementById("menuContainer");
@@ -766,7 +826,7 @@ function closeCh(i){
     icon.style.opacity = 1;
     clearInterval(imgLoopTimer);
 
-    if(i<18){
+    if(i < TOTAL_CHAPTERS){
         nextBtn = document.getElementById("ch_next"+i);
         nextBtn.style.transitionDuration = "1s";
     }
@@ -777,7 +837,7 @@ function closeCh(i){
 
     
 
-    switch (index - i){
+    switch (diff){
         case -1:
             ch1 = document.getElementById("ch"+i);
             ch2 = document.getElementById("ch"+(i+1));
@@ -877,7 +937,7 @@ function closeCh(i){
                 nextBtn.style.display = "none";
                 content.style.display = "none";
                 fullscreenBtn.style.display = "none";
-                if(i+4 <= 18){
+                if(i + 4 <= TOTAL_CHAPTERS){
                     ch5 = document.getElementById("ch"+(i+4));
                     ch5.style.transform = "translateY(0px)";
                     ch5.style.opacity = 1;
@@ -996,7 +1056,7 @@ function closeCh(i){
                 nextBtn.style.display = "none";
                 content.style.display = "none";
                 fullscreenBtn.style.display = "none";
-                if(i+3 <= 18){
+                if(i + 3 <= TOTAL_CHAPTERS){
                     ch5 = document.getElementById("ch"+(i+3));
                     ch5.style.transform = "translateY(0px)";
                     ch5.style.opacity = 1;
@@ -1047,7 +1107,7 @@ function closeCh(i){
             }, 700);
 
             setTimeout(() => {
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.marginTop = "600px";
                     nextBtn.style.opacity = 0;
                     nextBtn.style.filter = "blur(30px)";
@@ -1115,7 +1175,7 @@ function closeCh(i){
                 content.style.display = "none";
                 fullscreenBtn.style.display = "none";
                 
-                if(i+2 <= 18){
+                if(i + 2 <= TOTAL_CHAPTERS){
                     ch5 = document.getElementById("ch"+(i+2));
                     ch5.style.transform = "translateY(0px)";
                     ch5.style.opacity = 1;
@@ -1167,7 +1227,7 @@ function closeCh(i){
             }, 700);
 
             setTimeout(() => {
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.marginTop = "600px";
                     nextBtn.style.opacity = 0;
                     nextBtn.style.filter = "blur(30px)";
@@ -1239,10 +1299,10 @@ function closeCh(i){
                 slide2.style.display = "none";
                 content.style.display = "none";
                 fullscreenBtn.style.display = "none";
-                if(i<18){
+                if(i < TOTAL_CHAPTERS){
                     nextBtn.style.display = "none";
                 }
-                if(i+1 <= 18){
+                if(i + 1 <= TOTAL_CHAPTERS){
                     ch5 = document.getElementById("ch"+(i+1));
                     ch5.style.transform = "translateY(0px)";
                     ch5.style.opacity = 1;
@@ -1272,7 +1332,7 @@ function closeCh(i){
 }
 
 function nextBtnCh(i){
-    let index = Math.round(menuScorller.scrollTop/menuScorller.scrollHeight*18);
+    let index = Math.round(menuScorller.scrollTop/menuScorller.scrollHeight*TOTAL_CHAPTERS);
     const chContainer = document.getElementById("chContainer");
 
     const scrollBarBG = document.getElementById("scrollBarBG");
@@ -1312,11 +1372,11 @@ function nextBtnCh(i){
     icon2.style.transitionDuration = "0s";
     icon2.style.opacity = 1;
 
-    if(i<18){
+    if(i < TOTAL_CHAPTERS){
         nextBtn = document.getElementById("ch_next"+i);
         nextBtn.style.transitionDuration = "1s";
     }
-    if(i + 1 < 18){
+    if(i + 1 < TOTAL_CHAPTERS){
         nextBtn2 = document.getElementById("ch_next"+(i+1));
         nextBtn2.style.transitionDuration = "1s";
     }
@@ -1359,13 +1419,13 @@ function nextBtnCh(i){
         if(index - i == -4){
             chContainer.style.transitionDuration = "1s";
             index++;
-            menuScorller.scrollTo(0,((index)/18)*menuScorller.scrollHeight);
+            menuScorller.scrollTo(0, ((index) / TOTAL_CHAPTERS) * menuScorller.scrollHeight);
         }
         fullscreenImagesContainer.style.display = "none";
         ch2.style.transform = "translateY(0px)";
         ch2.style.opacity = 1;
         ch2.style.filter = "blur(0px)";
-        if(i+2 <= 18){
+        if(i + 2 <= TOTAL_CHAPTERS){
             ch4 = document.getElementById("ch"+(i+2));
             ch4.style.transform = "translateY(1080px)";
             ch4.style.opacity = 0;

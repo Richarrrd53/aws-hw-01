@@ -664,9 +664,10 @@
                 if (!res.ok) throw new Error('無法取得章節清單');
                 allChapters = await res.json();
 
-                // 填入 1~18 的下拉選單（標記哪些已存在，哪些已刪除）
+                // 填入 1~5 的下拉選單（標記哪些已存在，哪些已刪除）
                 chapterSelect.innerHTML = '';
-                for (let i = 1; i <= 18; i++) {
+                const maxChapter = Math.max(5, ...allChapters.map(c => c.chapter_number));
+                for (let i = 1; i <= maxChapter; i++) {
                     const ch = allChapters.find(c => c.chapter_number === i);
                     const opt = document.createElement('option');
                     opt.value = i;
@@ -683,10 +684,11 @@
             }
         }
 
-        // 建立 1~18 捷徑按鈕
+        // 建立 1~5 捷徑按鈕
         function createPills() {
             pillsContainer.innerHTML = '';
-            for (let i = 1; i <= 18; i++) {
+            const maxChapter = Math.max(5, ...allChapters.map(c => c.chapter_number));
+            for (let i = 1; i <= maxChapter; i++) {
                 const ch = allChapters.find(c => c.chapter_number === i);
                 const btn = document.createElement('button');
                 btn.className = 'pill-btn';

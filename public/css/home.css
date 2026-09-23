@@ -24,7 +24,7 @@ body{
     filter: blur(50px);
 }
 
-#Section1{
+#Section2{
     transform: translateX(0) rotate(0deg);
     display: flex;
     filter: blur(0px);
@@ -44,7 +44,7 @@ body{
     transform: translateX(100%);
 }
 
-#bgText1{
+#bgText2{
     transform: translateX(0);
 }
 
@@ -658,7 +658,7 @@ button.continueBtn .button-text {
 #scrollBar{
     position: absolute;
     background-color: #2e2e2e;
-    width: calc(1500px/18*4);
+    width: calc(1500px / 5 * 4);
     height: 15px;
     border-radius: 10px;
     cursor: grab;

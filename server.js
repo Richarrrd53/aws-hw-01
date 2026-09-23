@@ -18,24 +18,11 @@ const pool = new Pool({
 
 // 預設 18 個章節標題
 const defaultTitles = {
-    1: "Black",
-    2: "White",
-    3: "Milionia",
-    4: "Firework",
-    5: "Tea Time",
-    6: "Venom",
-    7: "Beach",
-    8: "Magic Forest",
-    9: "Sunset & Sea",
-    10: "Fairyland",
-    11: "Sunset",
-    12: "Black Shadow",
-    13: "Leave & Shadow",
-    14: "Waterfall Ecology",
-    15: "Creekside Ecology",
-    16: "Blossoms",
-    17: "Nostalgia",
-    18: "Product Photography"
+    1: "何謂憑證、HTTP、HTTPS、Port",
+    2: "inbound/outbound 防火牆是什麼",
+    3: "CIDR（Classless Inter-Domain Routing，無類別域間路由）",
+    4: "DNS、IP、Domain 與 URL",
+    5: "完整拆解一個URL"
 };
 
 // 若 chapters 資料庫為空，自動從 txt 初始化資料
@@ -44,8 +31,8 @@ async function initDb() {
         const res = await pool.query('SELECT COUNT(*) FROM chapters');
         const count = parseInt(res.rows[0].count, 10);
         if (count === 0) {
-            console.log('檢測到 chapters 資料表為空，正在匯入初始 18 個章節資料...');
-            for (let i = 1; i <= 18; i++) {
+            console.log('檢測到 chapters 資料表為空，正在匯入初始 5 個章節資料...');
+            for (let i = 1; i <= 5; i++) {
                 const textFileDir = path.join(__dirname, "public/data/ch" + i + ".txt");
                 let content = "";
                 if (fs.existsSync(textFileDir)) {

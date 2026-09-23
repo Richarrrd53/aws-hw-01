@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Richard's Space - Animation Concept</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- 基礎設定：隱藏卷軸、滿版 --- */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f0f2f5;
+            font-family: "Noto Sans TC", sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        /* --- 橫向捲軸容器 --- */
+        .gallery-container {
+            display: flex;
+            gap: 40px;
+            padding: 0 10vw; /* 左右留白 */
+            width: 100%;
+            height: 65vh;
+            overflow-x: auto;
+            overflow-y: hidden;
+            align-items: center;
+            scroll-behavior: smooth;
+            /* 隱藏預設捲軸 */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+            cursor: grab;
+        }
+        .gallery-container:active {
+            cursor: grabbing;
+        }
+        .gallery-container::-webkit-scrollbar {
+            display: none; 
+        }
+
+        /* --- 卡片本體 --- */
+        .card {
+            flex: 0 0 320px; /* 卡片固定寬度 */
+            height: 500px;
+            background-color: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                        box-shadow 0.4s ease,
+                        opacity 0.4s ease;
+            user-select: none;
+            /* 讓 JS 抓取 */
+            will-change: transform, opacity;
+        }
+
+        /* 滑鼠互動效果 */
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 75%;
+            overflow: hidden;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+
+        .card:hover .card-img {
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            padding: 24px;
+            height: 25%;
+            background: white;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #0d376e; /* 呼應你原本的藍色 */
+            font-weight: 700;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* --- 點擊後的覆蓋層 (Overlay) --- */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+            background: white;
+            display: none; /* 初始隱藏 */
+            opacity: 0;
+            flex-direction: column;
+            overflow-y: auto; /* 內容長可捲動 */
+        }
+
+        /* 這是做動畫用的圖片，會從卡片位置變形到這裡 */
+        #hero-image {
+            width: 100%;
+            height: 60vh;
+            object-fit: cover;
+            transform-origin: top left;
+            display: block;
+        }
+
+        #overlay-content {
+            padding: 60px 20vw;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .overlay-title {
+            font-size: 72px;
+            font-weight: 900;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .overlay-subtitle {
+            font-size: 20px;
+            color: #0d376e;
+            font-weight: bold;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .overlay-desc {
+            font-size: 18px;
+            line-height: 2;
+            color: #555;
+            max-width: 800px;
+        }
+
+        /* 關閉按鈕 */
+        #close-btn {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; /* 若圖片是深色 */
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* 當捲動超過圖片時，按鈕變深色以適應白底 */
+        #close-btn.dark-mode {
+            background: rgba(0, 0, 0, 0.05);
+            color: #333;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        #close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        /* 提示文字 */
+        .hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaa;
+            font-size: 14px;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="hint">← 左右拖曳或捲動，點擊卡片進入詳細頁面 →</div>
+
+    <div class="gallery-container" id="gallery"></div>
+
+    <div id="overlay">
+        <button id="close-btn">✕</button>
+        <img id="hero-image" src="" alt="Cover">
+        <div id="overlay-content">
+            <h1 class="overlay-title" id="ov-title">Title</h1>
+            <p class="overlay-subtitle" id="ov-sub">Subtitle</p>
+            <div class="overlay-desc" id="ov-desc"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 資料模擬 (Simulate Data) ---
+        const seriesData = Array.from({ length: 18 }, (_, i) => ({
+            id: i + 1,
+            title: `Series ${String(i + 1).padStart(2, '0')}`,
+            subtitle: ["Black & White", "Urban Life", "Nature Wild", "Portrait", "Neon Lights", "Abstract"][i % 6],
+            // 使用 Picsum 隨機圖
+            img: `https://picsum.photos/id/${(i * 12) + 10}/600/900`, 
+            desc: `這裡展示了 Series ${i+1} 的攝影作品概念。<br><br>
+                   在這組作品中，我嘗試運用光影的對比來表達 Richard's Space 的核心精神。
+                   每一個快門都是瞬間的永恆，每一張照片都訴說著一個未完的故事。<br><br>
+                   (這裡是模擬的內文，實際應用時請替換成你的作品介紹。)`
+        }));
+
+        // --- 2. 初始化渲染 ---
+        const gallery = document.getElementById('gallery');
+        const overlay = document.getElementById('overlay');
+        const heroImage = document.getElementById('hero-image');
+        const closeBtn = document.getElementById('close-btn');
+        const ovTitle = document.getElementById('ov-title');
+        const ovSub = document.getElementById('ov-sub');
+        const ovDesc = document.getElementById('ov-desc');
+        const overlayContent = document.getElementById('overlay-content');
+
+        // 渲染卡片
+        seriesData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = index;
+            card.innerHTML = `
+                <div class="card-img-container">
+                    <img class="card-img" src="${item.img}" alt="${item.title}" loading="lazy">
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">${item.title}</h2>
+                    <p class="card-subtitle">${item.subtitle}</p>
+                </div>
+            `;
+            // 點擊事件
+            card.addEventListener('click', () => openAnimation(item, card));
+            gallery.appendChild(card);
+        });
+
+        // 滑鼠滾輪轉橫向捲動
+        gallery.addEventListener('wheel', (evt) => {
+            evt.preventDefault();
+            gallery.scrollLeft += evt.deltaY;
+        });
+
+        // 關閉按鈕顏色切換 (捲動監聽)
+        overlay.addEventListener('scroll', () => {
+            if (overlay.scrollTop > window.innerHeight * 0.5) {
+                closeBtn.classList.add('dark-mode');
+            } else {
+                closeBtn.classList.remove('dark-mode');
+            }
+        });
+        closeBtn.addEventListener('click', closeAnimation);
+
+
+        // --- 3. 動畫核心邏輯 (WAAPI) ---
+        let isAnimating = false;
+
+        async function openAnimation(data, clickedCard) {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            // A. 準備資料
+            heroImage.src = data.img;
+            ovTitle.innerText = data.title;
+            ovSub.innerText = data.subtitle;
+            ovDesc.innerHTML = data.desc + data.desc; // 增加文字長度
+
+            // B. 鎖定背景捲動
+            document.body.style.overflow = "hidden";
+
+            // C. 計算位置 (FLIP - First)
+            const cardRect = clickedCard.getBoundingClientRect();
+            const imgRect = clickedCard.querySelector('.card-img').getBoundingClientRect();
+
+            // D. 讓其他卡片退場 (Stagger Animation)
+            const allCards = document.querySelectorAll('.card');
+            const exitPromises = [];
+            
+            allCards.forEach((card, idx) => {
+                if (card === clickedCard) {
+                    // 選中的卡片隱藏，準備讓 Overlay 接手
+                    card.style.opacity = 0;
+                } else {
+                    // 其他卡片依距離延遲下沉
+                    const dist = Math.abs(idx - parseInt(clickedCard.dataset.index));
+                    const anim = card.animate([
+                        { opacity: 1, transform: 'translateY(0) scale(1)' },
+                        { opacity: 0, transform: 'translateY(100px) scale(0.9)' }
+                    ], {
+                        duration: 400,
+                        delay: dist * 30, // 距離越遠越慢消失
+                        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                        fill: 'forwards'
+                    });
+                    exitPromises.push(anim.finished);
+                }
+            });
+
+            // E. 顯示 Overlay
+            overlay.style.display = 'flex';
+            overlay.style.opacity = 1;
+            closeBtn.classList.remove('dark-mode'); // 重置按鈕顏色
+
+            // F. 圖片展開動畫 (FLIP - Invert/Play)
+            // 設定初始狀態：跟卡片圖片一樣大、一樣位置
+            const expandAnim = heroImage.animate([
+                {
+                    width: `${imgRect.width}px`,
+                    height: `${imgRect.height}px`,
+                    transform: `translate(${imgRect.left}px, ${imgRect.top}px)`,
+                    borderRadius: '24px 24px 0 0' // 配合卡片圓角
+                },
+                {
+                    width: '100vw',
+                    height: '60vh',
+                    transform: 'translate(0, 0)',
+                    borderRadius: '0px'
+                }
+            ], {
+                duration: 800,
+                easing: 'cubic-bezier(0.2, 1, 0.2, 1)', // 強烈的減速曲線
+                fill: 'forwards'
+            });
+
+            // G. 背景白底淡入
+            const bgAnim = overlay.animate([
+                { backgroundColor: 'rgba(255,255,255,0)' },
+                { backgroundColor: 'rgba(255,255,255,1)' }
+            ], { duration: 400, fill: 'forwards' });
+
+            await expandAnim.finished;
+
+            // H. 文字內容上浮
+            overlayContent.animate([
+                { opacity: 0, transform: 'translateY(60px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+            ], {
+                duration: 600,
+                easing: 'ease-out',
+                fill: 'forwards'
+            });
+
+            isAnimating = false;
+        }
+
+        async function closeAnimation() {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            // A. 文字先下沉消失
+            const contentAnim = overlayContent.animate([
+                { opacity: 1, transform: 'translateY(0)' },
+                { opacity: 0, transform: 'translateY(30px)' }
+            ], { duration: 300, fill: 'forwards' });
+
+            await contentAnim.finished;
+
+            // B. 圖片縮回 + 背景淡出
+            // 簡單化：直接縮小並淡出，不強制回到原卡片位置(因為捲動位置可能變了)
+            const heroAnim = heroImage.animate([
+                { opacity: 1, transform: 'scale(1)' },
+                { opacity: 0, transform: 'scale(0.95)' }
+            ], { duration: 400, easing: 'ease-in', fill: 'forwards' });
+
+            const bgAnim = overlay.animate([
+                { opacity: 1 },
+                { opacity: 0 }
+            ], { duration: 400, fill: 'forwards' });
+
+            await Promise.all([heroAnim.finished, bgAnim.finished]);
+
+            // C. 重置 DOM 狀態
+            overlay.style.display = 'none';
+            overlay.scrollTop = 0; // 捲動回頂部
+            document.body.style.overflow = "";
+
+            // D. 卡片歸位
+            const allCards = document.querySelectorAll('.card');
+            allCards.forEach(card => {
+                card.style.opacity = ''; // 移除隱藏
+                card.animate([
+                    { opacity: 0, transform: 'translateY(80px)' },
+                    { opacity: 1, transform: 'translateY(0)' }
+                ], {
+                    duration: 600,
+                    delay: Math.random() * 200, // 隨機浮現，更自然
+                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // 帶一點彈性
+                    fill: 'forwards'
+                });
+            });
+
+            isAnimating = false;
+        }
+    </script>
+</body>
+</html>

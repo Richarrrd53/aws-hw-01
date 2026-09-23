@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="../css/home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="bgText" id="bgText1" class="noto-sans-tc">Richarrrd</div>
+    <div class="bgText" id="bgText2" class="noto-sans-tc">Main Menu</div>
+    <div class="Sections" id="Section1">
+        <div class="sectionContainers" id="homeContainer">
+            <div class="homeItems" id="homeItemImg">
+                <img src="../img/home/profile_removeBG_outline.png" alt="">
+            </div>
+            <div class="homeItems" id="homeItemText">
+                <h1>Welcome to</h1>
+                <h1><span style="color:#0e4081; font-weight: 900;">Richard</span>'s space</h1>
+                <p>Hi!我是資管三黃晟銘，歡迎來到我的攝影作品空間，歡迎您來欣賞我的作品集，期待能夠為您帶來愉悅的體驗。</p>
+                <p style="margin-top: 20px;"><span style="color: #2e2e2e; font-size: 20px;">Hi! I'm Richard, a third-year student in Information Management. Welcome to my photography space. I welcome you to enjoy my portfolio and look forward to bringing you a pleasant exprience.</span></p>
+                <button class="continueBtn">
+                    <span class="circle" aria-hidden="true">
+                        <span class="icon arrow"></span>
+                    </span>
+                    <span class="button-text" onclick="nextPage(1)">Get Started</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="Sections" id="Section2">
+        <div class="sectionContainers" id="menuContainer">
+            <div id="menuScroller"></div>
+
+            <button class="backBtn" id="backBtn">
+                <span class="circle" aria-hidden="true">
+                    <span class="icon arrow"></span>
+                </span>
+                <span class="button-text" onclick="prevPage(1)">Back</span>
+            </button>
+            <div id="chContainer">
+                <div id="ch_g_1">
+                    <div class="chapters" id="ch1">
+                        <div class="ch_bg" id="ch1_bg"></div>
+                        <h1 class="ch_title" id="ch1_title">Series01</h1>
+                        <h2 class="ch_subtitle" id="ch1_subtitle">Black</h2>
+                        <div class="ch_icon" id="ch1_icon"><img src="../img/work/1-1.jpg" alt="系列1"></div>
+                        <button class="btn_close" id="close1">X Close</button>
+                        <h1 class="ch_slide_1" id="ch1_slide_1">Series01</h1>
+                        <h1 class="ch_slide_2" id="ch1_slide_2">Series02</h1>
+                        <button class="ch_btn_next" id="ch_next1">></button>
+                        <div class="readmore_box" id="readmore1">
+                            <button class="readmore"><span>READ MORE</span><span>></span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ch_g_2">
+                    <div class="chapters" id="ch2">
+                        <div class="ch_bg" id="ch2_bg"></div>
+                        <h1 class="ch_title" id="ch2_title">Series02</h1>
+                        <h2 class="ch_subtitle" id="ch2_subtitle">White</h2>
+                        <div class="ch_icon" id="ch2_icon"><img src="../img/work/2-1.jpg" alt="系列2"></div>
+                        <button class="btn_close" id="close2">X Close</button>
+                        <h1 class="ch_slide_1" id="ch2_slide_1">Series02</h1>
+                        <h1 class="ch_slide_2" id="ch2_slide_2">Series03</h1>
+                        <button class="ch_btn_next" id="ch_next2">></button>
+                        <div class="readmore_box" id="readmore2">
+                            <button class="readmore" ><span>READ MORE</span><span>></span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ch_g_3">
+                    <div class="chapters" id="ch3">
+                        <div class="ch_bg" id="ch3_bg"></div>
+                        <h1 class="ch_title" id="ch3_title">Series03</h1>
+                        <h2 class="ch_subtitle" id="ch3_subtitle">Milionia</h2>
+                        <div class="ch_icon" id="ch3_icon"><img src="../img/work/3-1.jpg" alt="系列3"></div>
+                        <button class="btn_close" id="close3">X Close</button>
+                        <h1 class="ch_slide_1" id="ch3_slide_1">Series03</h1>
+                        <h1 class="ch_slide_2" id="ch3_slide_2">Series04</h1>
+                        <button class="ch_btn_next" id="ch_next3">></button>
+                        <div class="readmore_box" id="readmore3">
+                            <button class="readmore"><span>READ MORE</span><span>></span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ch_g_4">
+                    <div class="chapters" id="ch4">
+                        <div class="ch_bg" id="ch4_bg"></div>
+                        <h1 class="ch_title" id="ch4_title">Series04</h1>
+                        <h2 class="ch_subtitle" id="ch4_subtitle">Firework</h2>
+                        <div class="ch_icon" id="ch4_icon"><img src="../img/work/4-1.jpg" alt="系列4"></div>
+                        <button class="btn_close" id="close4">X Close</button>
+                        <h1 class="ch_slide_1" id="ch4_slide_1">Series04</h1>
+                        <h1 class="ch_slide_2" id="ch4_slide_2">Series05</h1>
+                        <button class="ch_btn_next" id="ch_next4">></button>
+                        <div class="readmore_box" id="readmore4">
+                            <button class="readmore"><span>READ MORE</span><span>></span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ch_g_5">
+                    <div class="chapters unfocusCh" id="ch5">
+                        <div class="ch_bg" id="ch5_bg"></div>
+                        <h1 class="ch_title" id="ch5_title">Series05</h1>
+                        <h2 class="ch_subtitle" id="ch5_subtitle">Tea Time</h2>
+                        <div class="ch_icon" id="ch5_icon"><img src="../img/work/5-1.jpg" alt="系列5"></div>
+                        <button class="btn_close" id="close5">X Close</button>
+                        <h1 class="ch_slide_1" id="ch5_slide_1">Series04</h1>
+                        <h1 class="ch_slide_2" id="ch5_slide_2">Series05</h1>
+                        <div class="readmore_box" id="readmore5">
+                            <button class="readmore"><span>READ MORE</span><span>></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ch_contents" id="ch_content"></div>
+            <button class="ch_fullscreenBtn" id="ch_fullscreenBtn" onclick="fullscreenCh();">
+                <span class="circle" aria-hidden="true">
+                    <svg class="icon" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                        d="M32 32C14.3 32 0 46.3 0 64v96c0 17.7 14.3 32 32 32s32-14.3 32-32V96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V352zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h64v64c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H320zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32v64H320c-17.7 0-32 14.3-32 32s14.3 32 32 32h96c17.7 0 32-14.3 32-32V352z"
+                        ></path>
+                    </svg>
+                </span>
+                <span class="button-text" onclick="">以全螢幕瀏覽照片</span>
+            </button>
+            <div class="fullscrBG" id="fullscrBG"></div>
+            <div class="fullscreenImagesContainer" id="fullscreenImagesContainer">
+                <div class="fullscreenImagesG" id="fullscreenImagesG">
+                    <img class="fullscreenImages" src="../img/work/1-1.jpg" alt="">
+                </div>
+                <div class="fullscreenImagesG" id="fullscreenImagesG2">
+                    <img class="fullscreenImages" src="../img/work/1-1.jpg" alt="">
+                </div>
+                <div id="imgLoadingBG">
+                    <div class="dot-spinner">
+                        <div class="dot-spinner__dot"></div>
+                        <div class="dot-spinner__dot"></div>
+                        <div class="dot-spinner__dot"></div>
+                        <div class="dot-spinner__dot"></div>
+                        <div class="dot-spinner__dot"></div>
+                        <div class="dot-spinner__dot"></div>
+                        <div class="dot-spinner__dot"></div>
+                        <div class="dot-spinner__dot"></div>
+                    </div>
+                    <p>圖片載入中，請稍後...</p>
+                </div>
+            </div>
+            <div id="fullscreenToolContainer">
+                <button class="fullscrCloseBtn" id="fullscrCloseBtn" onclick="exitFullscr();"></button>
+                <button class="fullscrSwitchBtn" id="fullscrNext" onclick="fullscrNextImg();">></button>
+                <button class="fullscrSwitchBtn" id="fullscrPrev" onclick="fullscrPrevImg();">&lt;</button>
+                <div id="fullscrScrollBarBG">
+                    <div id="fullscrScrollBarG">
+                        <div id="fullscrScrollBarContainer">
+    
+                        </div>
+                    </div>
+                    <div id="fullscrPageNum">
+                        <span>
+                        </span>
+                        <span>/</span>
+                        <span></span>
+                    </div>
+                    <input type="text" id="pageNumInput">
+                </div>
+                <div id="pageNumKeyboard">
+                    <div class="key" onclick="typePageNum(1)"><div class="keyLight"></div>1</div>
+                    <div class="key" onclick="typePageNum(2)"><div class="keyLight"></div>2</div>
+                    <div class="key" onclick="typePageNum(3)"><div class="keyLight"></div>3</div>
+                    <div class="key" onclick="typePageNum(4)"><div class="keyLight"></div>4</div>
+                    <div class="key" onclick="typePageNum(5)"><div class="keyLight"></div>5</div>
+                    <div class="key" onclick="typePageNum(6)"><div class="keyLight"></div>6</div>
+                    <div class="key" onclick="typePageNum(7)"><div class="keyLight"></div>7</div>
+                    <div class="key" onclick="typePageNum(8)"><div class="keyLight"></div>8</div>
+                    <div class="key" onclick="typePageNum(9)"><div class="keyLight"></div>9</div>
+                    <div class="key" onclick="typePageNum('a')" id="deleteKey"><div class="keyLight"></div><img src="../img/icon/delete.svg" alt=""></div>
+                    <div class="key" onclick="typePageNum(0)"><div class="keyLight"></div>0</div>
+                    <div class="key" onclick="typePageNum('b')" id="enterKey"><div class="keyLight"></div><img src="../img/icon/check.svg" alt=""></div>
+
+                </div>
+                
+            </div>
+            <div id="scrollBarBG">
+                <div id="scrollBar"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/home.js"></script>
+</body>
+</html>

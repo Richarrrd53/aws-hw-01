@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>章節內容管理後台 - Richard's Space</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --primary: #0e4081;
+            --primary-hover: #0a2d5c;
+            --primary-light: #e8f0fe;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --bg-page: #f4f6f9;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 導航欄 */
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title-group h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .header-title-group .brand {
+            color: var(--primary);
+            font-weight: 900;
+        }
+
+        .badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-link:hover {
+            color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        /* 主容器 */
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 頂部控制面板：選擇章節與標題 */
+        .control-card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .step-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .fields-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr auto;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        @media (max-width: 1050px) {
+            .fields-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: #fafbfc;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        select:focus, input[type="text"]:focus, textarea:focus {
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(14, 64, 129, 0.12);
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-save {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            height: 48px;
+            box-shadow: 0 2px 6px rgba(14, 64, 129, 0.25);
+        }
+
+        .btn-save:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(14, 64, 129, 0.35);
+        }
+
+        .btn-save:active {
+            transform: translateY(0);
+        }
+
+        .btn-save:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-delete {
+            background-color: #ffffff;
+            color: var(--danger);
+            border: 1.5px solid var(--danger);
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            height: 48px;
+        }
+
+        .btn-delete:hover:not(:disabled) {
+            background-color: var(--danger);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-delete:disabled {
+            border-color: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            background-color: #f9fafb;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 快捷章節切換按鈕條 */
+        .chapter-pills-bar {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .chapter-pills-bar span {
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-right: 4px;
+        }
+
+        .pill-btn {
+            background: #f3f4f6;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pill-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .pill-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pill-btn.deleted {
+            background: #fff1f2;
+            border-color: #fecdd3;
+            color: #be123c;
+            text-decoration: line-through;
+        }
+
+        .pill-btn.deleted.active {
+            background: #e11d48;
+            color: white;
+            border-color: #e11d48;
+        }
+
+        /* 編輯與預覽區塊 */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 540px;
+        }
+
+        @media (max-width: 900px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pane-card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pane-header {
+            padding: 12px 18px;
+            background-color: #f9fafb;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pane-header-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 工具列 */
+        .markdown-toolbar {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .toolbar-btn:hover {
+            background-color: #e5e7eb;
+            color: var(--text-main);
+        }
+
+        /* Markdown 編輯器 */
+        textarea#markdownEditor {
+            flex: 1;
+            width: 100%;
+            padding: 18px;
+            border: none;
+            font-family: "Consolas", "Monaco", "Courier New", monospace;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #1e293b;
+            resize: none;
+            outline: none;
+            background-color: #ffffff;
+            min-height: 480px;
+        }
+
+        /* 即時預覽窗格 */
+        .preview-pane {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #334155;
+            min-height: 480px;
+        }
+
+        /* 預覽窗格 Markdown 排版樣式 */
+        .preview-pane h1, .preview-pane h2, .preview-pane h3, .preview-pane h4 {
+            margin-top: 1.2em;
+            margin-bottom: 0.5em;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .preview-pane h1 { font-size: 1.75em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3em; }
+        .preview-pane h2 { font-size: 1.4em; }
+        .preview-pane h3 { font-size: 1.2em; }
+        .preview-pane p { margin-bottom: 1em; }
+        .preview-pane ul, .preview-pane ol { padding-left: 1.5em; margin-bottom: 1em; }
+        .preview-pane li { margin-bottom: 0.25em; }
+        .preview-pane blockquote {
+            border-left: 4px solid var(--primary);
+            padding: 8px 16px;
+            margin: 1em 0;
+            background: var(--primary-light);
+            border-radius: 0 8px 8px 0;
+            color: #334155;
+        }
+        .preview-pane code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: monospace;
+            color: #d946ef;
+        }
+        .preview-pane pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9em;
+            margin-bottom: 1em;
+        }
+        .preview-pane pre code { background: transparent; padding: 0; color: inherit; }
+        .preview-pane a { color: var(--primary); text-decoration: underline; }
+        .preview-pane hr { border: none; border-top: 1px solid var(--border-color); margin: 1.5em 0; }
+
+        /* 狀態列與 Toast 通知 */
+        .status-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .status-tag.active {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-tag.deleted {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #1e293b;
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background-color: var(--success); }
+        .toast.error { background-color: var(--danger); }
+        .toast.info { background-color: var(--primary); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title-group">
+            <h1><span class="brand">Richard's</span> Space</h1>
+            <span class="badge">章節管理系統 (/admin 或 /auth)</span>
+        </div>
+        <div class="header-actions">
+            <a href="/" target="_blank" class="btn-link">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                </svg>
+                前往首頁作品集
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- 控制面板：選擇章節、修改標題、儲存、刪除 -->
+        <section class="control-card">
+            <div class="section-step">
+                <div class="step-circle">1</div>
+                選擇 Chapter & 修改標題 / 刪除章節
+            </div>
+            <div class="fields-grid">
+                <div class="form-group">
+                    <label for="chapterSelect">選擇 Chapter</label>
+                    <select id="chapterSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label for="chapterTitleInput">章節標題 (Title)</label>
+                    <input type="text" id="chapterTitleInput" placeholder="請輸入此章節標題..." />
+                </div>
+                <div class="actions-group">
+                    <button id="saveBtn" class="btn-save" onclick="saveChapter()">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                        </svg>
+                        <span>儲存 (UPDATE chapters)</span>
+                    </button>
+                    <button id="deleteBtn" class="btn-delete" onclick="deleteChapter()">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span>刪除章節 (DELETE)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 快速切換 Chapter 1 ~ 18 按鈕列 -->
+            <div class="chapter-pills-bar">
+                <span>快速選擇：</span>
+                <div id="pillsContainer" style="display: flex; gap: 6px;"></div>
+            </div>
+
+            <div class="status-meta">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="chapterStatusBadge" class="status-tag active">啟用中</span>
+                    <span id="updateTimeText">最後更新時間：載入中...</span>
+                </div>
+                <span id="charCountText">字數統計：0 字</span>
+            </div>
+        </section>
+
+        <!-- 編輯與即時預覽 -->
+        <section class="editor-container">
+            <!-- 編輯器 -->
+            <div class="pane-card">
+                <div class="pane-header">
+                    <div class="pane-header-title">
+                        <div class="step-circle" style="width: 20px; height: 20px; font-size: 11px;">2</div>
+                        修改 Markdown 內容
+                    </div>
+                    <div class="markdown-toolbar">
+                        <button class="toolbar-btn" onclick="insertSyntax('**', '**')"><b>B</b> 粗體</button>
+                        <button class="toolbar-btn" onclick="insertSyntax('*', '*')"><i>I</i> 斜體</button>
+                        <button class="toolbar-btn" onclick="insertSyntax('# ', '')">H1</button>
+                        <button class="toolbar-btn" onclick="insertSyntax('## ', '')">H2</button>
+                        <button class="toolbar-btn" onclick="insertSyntax('### ', '')">H3</button>
+                        <button class="toolbar-btn" onclick="insertSyntax('> ', '')">引用</button>
+                        <button class="toolbar-btn" onclick="insertSyntax('- ', '')">清單</button>
+                        <button class="toolbar-btn" onclick="insertSyntax('`', '`')">代碼</button>
+                    </div>
+                </div>
+                <textarea id="markdownEditor" placeholder="在此以 Markdown 格式撰寫或修改章節內容..." spellcheck="false"></textarea>
+            </div>
+
+            <!-- 即時預覽 -->
+            <div class="pane-card">
+                <div class="pane-header">
+                    <div class="pane-header-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        Markdown 即時渲染預覽 (Live Preview)
+                    </div>
+                </div>
+                <div class="preview-pane" id="previewPane"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let currentChapter = 1;
+        let allChapters = [];
+
+        const chapterSelect = document.getElementById('chapterSelect');
+        const chapterTitleInput = document.getElementById('chapterTitleInput');
+        const markdownEditor = document.getElementById('markdownEditor');
+        const previewPane = document.getElementById('previewPane');
+        const updateTimeText = document.getElementById('updateTimeText');
+        const charCountText = document.getElementById('charCountText');
+        const chapterStatusBadge = document.getElementById('chapterStatusBadge');
+        const pillsContainer = document.getElementById('pillsContainer');
+        const saveBtn = document.getElementById('saveBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+
+        // 初始化
+        async function init() {
+            await loadAllChapters();
+            createPills();
+            switchChapter(1);
+        }
+
+        // 載入所有章節資料
+        async function loadAllChapters() {
+            try {
+                const res = await fetch('/api/chapters');
+                if (!res.ok) throw new Error('無法取得章節清單');
+                allChapters = await res.json();
+
+                // 填入 1~18 的下拉選單（標記哪些已存在，哪些已刪除）
+                chapterSelect.innerHTML = '';
+                for (let i = 1; i <= 18; i++) {
+                    const ch = allChapters.find(c => c.chapter_number === i);
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    if (ch) {
+                        opt.textContent = `Chapter ${i}：${ch.title || '未命名'}`;
+                    } else {
+                        opt.textContent = `Chapter ${i}：[已刪除 / 未建立]`;
+                    }
+                    chapterSelect.appendChild(opt);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('載入章節資料失敗，請確認後端已啟動', 'error');
+            }
+        }
+
+        // 建立 1~18 捷徑按鈕
+        function createPills() {
+            pillsContainer.innerHTML = '';
+            for (let i = 1; i <= 18; i++) {
+                const ch = allChapters.find(c => c.chapter_number === i);
+                const btn = document.createElement('button');
+                btn.className = 'pill-btn';
+                if (!ch) {
+                    btn.classList.add('deleted');
+                    btn.title = `Chapter ${i} (已刪除)`;
+                }
+                if (i === currentChapter) {
+                    btn.classList.add('active');
+                }
+                btn.innerText = `Ch ${i}` + (!ch ? ' ✕' : '');
+                btn.id = `pill-ch-${i}`;
+                btn.onclick = () => switchChapter(i);
+                pillsContainer.appendChild(btn);
+            }
+        }
+
+        // 切換章節
+        function switchChapter(chNum) {
+            currentChapter = parseInt(chNum, 10);
+            chapterSelect.value = currentChapter;
+
+            // 更新捷徑按鈕狀態
+            document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
+            const activePill = document.getElementById(`pill-ch-${currentChapter}`);
+            if (activePill) activePill.classList.add('active');
+
+            const chapter = allChapters.find(c => c.chapter_number === currentChapter);
+            if (chapter) {
+                // 章節存在
+                chapterTitleInput.value = chapter.title || '';
+                markdownEditor.value = chapter.content || '';
+                markdownEditor.placeholder = "在此以 Markdown 格式撰寫或修改章節內容...";
+                deleteBtn.disabled = false;
+                deleteBtn.title = `刪除 Chapter ${currentChapter}`;
+                chapterStatusBadge.className = 'status-tag active';
+                chapterStatusBadge.innerText = '啟用中';
+
+                if (chapter.updated_at) {
+                    const d = new Date(chapter.updated_at);
+                    updateTimeText.innerText = `最後更新時間：${d.toLocaleString('zh-TW')}`;
+                } else {
+                    updateTimeText.innerText = '最後更新時間：尚未更新';
+                }
+            } else {
+                // 章節已被刪除
+                chapterTitleInput.value = '';
+                markdownEditor.value = '';
+                markdownEditor.placeholder = "此章節目前已被刪除。若要重新啟用，請在此輸入標題與 Markdown 內容，然後點擊「儲存」即可重建此章節！";
+                deleteBtn.disabled = true;
+                deleteBtn.title = "此章節目前已被刪除，無法再刪除";
+                chapterStatusBadge.className = 'status-tag deleted';
+                chapterStatusBadge.innerText = '已刪除 (可輸入內容並儲存以重建)';
+                updateTimeText.innerText = '狀態：已自資料庫刪除';
+            }
+
+            renderPreview();
+        }
+
+        // 下拉選單切換監聽
+        chapterSelect.addEventListener('change', (e) => {
+            switchChapter(e.target.value);
+        });
+
+        // 編輯器輸入即時預覽
+        markdownEditor.addEventListener('input', () => {
+            renderPreview();
+        });
+
+        // 渲染 Markdown
+        function renderPreview() {
+            const raw = markdownEditor.value;
+            charCountText.innerText = `字數統計：${raw.length} 字`;
+            const isDel = !allChapters.some(c => c.chapter_number === currentChapter);
+
+            if (!raw) {
+                previewPane.innerHTML = isDel 
+                    ? '<p style="color:#ef4444;"><i>（此章節目前已刪除，前台將標記為已刪除。輸入內容並儲存可重新發布）</i></p>'
+                    : '<p style="color:#9ca3af;"><i>（尚未輸入內容）</i></p>';
+                return;
+            }
+
+            if (typeof marked !== 'undefined' && marked.parse) {
+                previewPane.innerHTML = marked.parse(raw);
+            } else {
+                previewPane.innerText = raw;
+            }
+        }
+
+        // 插入 Markdown 語法捷徑
+        function insertSyntax(prefix, suffix) {
+            const start = markdownEditor.selectionStart;
+            const end = markdownEditor.selectionEnd;
+            const text = markdownEditor.value;
+            const selected = text.substring(start, end);
+            const replacement = prefix + (selected || '文字') + suffix;
+            markdownEditor.value = text.substring(0, start) + replacement + text.substring(end);
+            markdownEditor.focus();
+            markdownEditor.selectionStart = start + prefix.length;
+            markdownEditor.selectionEnd = start + prefix.length + (selected ? selected.length : 2);
+            renderPreview();
+        }
+
+        // 儲存修改 (UPDATE chapters)
+        async function saveChapter() {
+            const title = chapterTitleInput.value.trim();
+            const content = markdownEditor.value;
+
+            if (!title) {
+                showToast('請填寫章節標題！', 'error');
+                chapterTitleInput.focus();
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.querySelector('span').innerText = '儲存中...';
+
+            try {
+                const res = await fetch(`/api/chapters/${currentChapter}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || '儲存失敗');
+                }
+
+                // 重新載入所有章節並重新選取
+                await loadAllChapters();
+                createPills();
+                switchChapter(currentChapter);
+
+                showToast(`Chapter ${currentChapter} 儲存成功！(已寫入 chapters 資料庫)`, 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('儲存失敗：' + err.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.querySelector('span').innerText = '儲存 (UPDATE chapters)';
+            }
+        }
+
+        // 刪除章節 (DELETE chapters)
+        async function deleteChapter() {
+            const chapter = allChapters.find(c => c.chapter_number === currentChapter);
+            const chName = chapter ? chapter.title : `Chapter ${currentChapter}`;
+
+            const confirmed = confirm(
+                `確定要刪除 Chapter ${currentChapter}（${chName}）嗎？\n\n` +
+                `• 資料庫中此章節將被移除 (DELETE FROM chapters)\n` +
+                `• 前台展示頁面將自動標記為已刪除，且不會引發任何錯誤。\n` +
+                `• 稍後您亦可隨時在後台重新輸入內容儲存以復原。`
+            );
+
+            if (!confirmed) return;
+
+            deleteBtn.disabled = true;
+            deleteBtn.querySelector('span').innerText = '刪除中...';
+
+            try {
+                const res = await fetch(`/api/chapters/${currentChapter}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || '刪除失敗');
+                }
+
+                showToast(`Chapter ${currentChapter} 已成功刪除！`, 'success');
+
+                // 重新取得最新章節列表並更新畫面
+                await loadAllChapters();
+                createPills();
+                switchChapter(currentChapter);
+            } catch (err) {
+                console.error(err);
+                showToast('刪除失敗：' + err.message, 'error');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.querySelector('span').innerText = '刪除章節 (DELETE)';
+            }
+        }
+
+        // 提示訊息 Toast
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        // 快捷鍵 Ctrl+S / Cmd+S 儲存
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveChapter();
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

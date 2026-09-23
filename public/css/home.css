@@ -337,7 +337,7 @@ button.continueBtn .button-text {
     width: 240px;
     white-space: nowrap;
     position: absolute;
-    margin-left: 0px;
+    margin-left: 40px;
     margin-top: 190px;
     color: #2e2e2e;
     font-size: 32px;
@@ -367,8 +367,8 @@ button.continueBtn .button-text {
 
 /* 漸變遮罩與自動滾動 */
 .ch_subtitle.is-overflowing{
-    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
-    mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - var(--mask-fade, 20px)), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - var(--mask-fade, 20px)), transparent 100%);
     animation: subtitleMaskAnim var(--scroll-dur, 6s) ease infinite;
 }
 
@@ -395,8 +395,8 @@ button.continueBtn .button-text {
 
 @keyframes subtitleMaskAnim {
     0%, 15% {
-        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
-        mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - var(--mask-fade, 20px)), transparent 100%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - var(--mask-fade, 20px)), transparent 100%);
     }
     22%, 40% {
         -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 calc(100% - 20px), transparent 100%);
@@ -411,8 +411,8 @@ button.continueBtn .button-text {
         mask-image: linear-gradient(90deg, transparent 0%, #000 20px, #000 calc(100% - 20px), transparent 100%);
     }
     95%, 100% {
-        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
-        mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 20px), transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - var(--mask-fade, 20px)), transparent 100%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - var(--mask-fade, 20px)), transparent 100%);
     }
 }
 
@@ -606,7 +606,7 @@ button.continueBtn .button-text {
     position: absolute;
     font-family: "Noto Sans TC", sans-serif;
     margin-left: 980px;
-    margin-top: 250px;
+    margin-top: 300px;
     font-size: 24px;
     transition: all 1s cubic-bezier(.4,0,.2,1);
     letter-spacing: 2px;
@@ -729,7 +729,7 @@ button.continueBtn .button-text {
 }
 
 #scrollBar:hover{
-    scale: 1.2;
+    scale: 1.01;
 }
 
 #scrollBar:active{

@@ -214,14 +214,20 @@ function checkSubtitleOverflow(subEl) {
     subEl.classList.remove("is-overflowing");
     subEl.style.removeProperty("--scroll-dist");
     subEl.style.removeProperty("--scroll-dur");
+    subEl.style.removeProperty("--mask-fade");
 
-    const containerWidth = subEl.clientWidth || 200;
+    // Force layout update so textSpan dimensions reflect any font/width changes
+    void textSpan.offsetWidth;
+
+    const containerWidth = subEl.clientWidth || (subEl.style.width ? parseInt(subEl.style.width) : 200);
     const textWidth = textSpan.scrollWidth;
 
     if (textWidth > containerWidth + 4) {
         const diff = textWidth - containerWidth;
-        const dur = Math.max(4.5, Math.min(12, diff / 22)); // smooth reading speed
-        subEl.style.setProperty("--scroll-dist", (diff + 10) + "px");
+        const dur = Math.max(5, Math.min(20, diff / 25)); // smooth reading speed
+        const fade = containerWidth > 400 ? 36 : 20;
+        subEl.style.setProperty("--mask-fade", fade + "px");
+        subEl.style.setProperty("--scroll-dist", (diff + fade) + "px");
         subEl.style.setProperty("--scroll-dur", dur + "s");
         subEl.classList.add("is-overflowing");
     } else {
@@ -388,9 +394,9 @@ function readmore(i) {
                 title.style.opacity = 0;
 
                 subtitle.style.fontSize = "80px";
-                subtitle.style.marginLeft = "2400px";
+                subtitle.style.marginLeft = "2200px";
                 subtitle.style.marginTop = "-500px";
-                subtitle.style.width = "1000px";
+                subtitle.style.width = "800px";
 
                 icon.style.width = "600px";
                 icon.style.maxHeight = "800px";
@@ -464,6 +470,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.zIndex = imgNum[i-1]+8;
                 imgH = icon.children[0].offsetHeight;
                 fullscreenImagesG[0].style.height = imgH + "px";
+                checkSubtitleOverflow(subtitle);
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
@@ -512,9 +519,9 @@ function readmore(i) {
                 title.style.opacity = 0;
 
                 subtitle.style.fontSize = "80px";
-                subtitle.style.marginLeft = "2400px";
+                subtitle.style.marginLeft = "2200px";
                 subtitle.style.marginTop = "-500px";
-                subtitle.style.width = "1000px";
+                subtitle.style.width = "800px";
 
                 icon.style.width = "600px";
                 icon.style.maxHeight = "800px";
@@ -583,6 +590,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.zIndex = imgNum[i-1]+8;
                 imgH = icon.children[0].offsetHeight;
                 fullscreenImagesG[0].style.height = imgH + "px";
+                checkSubtitleOverflow(subtitle);
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
@@ -632,9 +640,9 @@ function readmore(i) {
                 title.style.opacity = 0;
 
                 subtitle.style.fontSize = "80px";
-                subtitle.style.marginLeft = "2400px";
+                subtitle.style.marginLeft = "2200px";
                 subtitle.style.marginTop = "-500px";
-                subtitle.style.width = "1000px";
+                subtitle.style.width = "800px";
 
                 icon.style.width = "600px";
                 icon.style.maxHeight = "800px";
@@ -703,6 +711,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.zIndex = imgNum[i-1]+8;
                 imgH = icon.children[0].offsetHeight;
                 fullscreenImagesG[0].style.height = imgH + "px";
+                checkSubtitleOverflow(subtitle);
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
@@ -748,9 +757,9 @@ function readmore(i) {
                 title.style.opacity = 0;
 
                 subtitle.style.fontSize = "80px";
-                subtitle.style.marginLeft = "2400px";
+                subtitle.style.marginLeft = "2200px";
                 subtitle.style.marginTop = "-500px";
-                subtitle.style.width = "1000px";
+                subtitle.style.width = "800px";
 
                 icon.style.width = "600px";
                 icon.style.maxHeight = "800px";
@@ -828,6 +837,7 @@ function readmore(i) {
                 fullscreenImagesG[1].style.zIndex = imgNum[i-1]+8;
                 imgH = icon.children[0].offsetHeight;
                 fullscreenImagesG[0].style.height = imgH + "px";
+                checkSubtitleOverflow(subtitle);
                 fullscreenImagesG[1].style.height = imgH + "px";
                 icon.style.opacity = 0;
                 tempN = 0;
@@ -857,6 +867,7 @@ function closeCh(i){
     bg = document.getElementById("ch"+i+"_bg");
     title = document.getElementById("ch"+i+"_title");
     subtitle = document.getElementById("ch"+i+"_subtitle");
+    subtitle.classList.remove("is-overflowing");
     icon = document.getElementById("ch"+i+"_icon");
     closeBtn = document.getElementById("close"+i);
     closeBtn.style.transitionDuration = "1.5s";
@@ -1551,9 +1562,10 @@ function nextBtnCh(i){
         title2.style.opacity = 0;
 
         subtitle2.style.fontSize = "80px";
-        subtitle2.style.marginLeft = "2400px";
+        subtitle2.style.marginLeft = "2200px";
         subtitle2.style.marginTop = "-500px";
-        subtitle2.style.width = "1000px";
+        subtitle2.style.width = "800px";
+        setTimeout(() => { checkSubtitleOverflow(subtitle2); }, 1700);
 
         icon2.style.width = "600px";
         icon2.style.maxHeight = "800px";
@@ -1619,6 +1631,7 @@ function nextBtnCh(i){
         fullscreenImagesG[1].style.zIndex = imgNum[i]+8;
         imgH = icon2.children[0].offsetHeight;
         fullscreenImagesG[0].style.height = imgH + "px";
+                checkSubtitleOverflow(subtitle);
         fullscreenImagesG[1].style.height = imgH + "px";
         icon2.style.opacity = 0;
         tempN = 0;
